@@ -1,0 +1,31 @@
+apiVersion: apps/v1beta1
+kind: Deployment
+metadata:
+  # this deployment is called uid-deployment
+  name: uid-deployment
+  labels:
+    app: lunch-n-learn
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: lunch-n-learn
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      # create up to 1 more pod than the specified replicas
+      maxSurge: 1
+      # at most only 1 pod is unavailable
+      maxUnavailable: 1
+  template:
+    metadata:
+      labels:
+        # each Pod will have a label app=lunch-n-learn
+        app: lunch-n-learn
+    spec:
+      # each pod will have uid-printer v1 and open port 8080 on the container
+      containers:
+      - name: uid
+        image: jmcorallo/uid-printer:1
+        ports:
+        - containerPort: 8080
