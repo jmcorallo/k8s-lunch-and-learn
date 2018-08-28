@@ -1,0 +1,46 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: ts-writer
+  labels:
+    app: ts-writer
+spec:
+  ports:
+  - port: 80
+    name: web
+  clusterIP: None
+  selector:
+    app: ts-writer
+---
+apiVersion: apps/v1beta2
+kind: StatefulSet
+metadata:
+  name: ts-writer
+spec:
+  serviceName: "ts-writer"
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ts-writer
+  template:
+    metadata:
+      labels:
+        app: ts-writer
+    spec:
+      terminationGracePeriodSeconds: 10
+      containers:
+      - name: timestamp-writer
+        image: jmcorallo/timestamp-writer:1
+        volumeMounts:
+        - name: the-data
+          mountPath: /data
+  volumeClaimTemplates:
+  - metadata:
+      name: efs
+      annotations:
+        volume.beta.kubernetes.io/storage-class: aws-efs
+    spec:
+      accessModes: [ "ReadWriteOnce" ]
+      resources:
+        requests:
+          storage: 1Mi
